@@ -28,8 +28,11 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+def convertMessage(type, message):
+	return json.dumps({"action":type, "message":message})
+
 def printjson(type, message):
-	print(json.dumps({type: message}))
+	print(convertMessage(type, message))
 	sys.stdout.flush()
 
 def signalHandler(signal, frame):
@@ -65,7 +68,21 @@ ap.add_argument("-ds", "--dataset", required=False, default="../dataset/",
 	help="path to input directory of faces + images")
 ap.add_argument("-t", "--tolerance", type=float, required=False, default=0.6,
 	help="How much distance between faces to consider it a match. Lower is more strict.")
+ap.add_argument("-mq", "--useMqtt", type=str2bool, required=False, default=False,
+	help="Enable sending messages to MQTT service")
+ap.add_argument("-mqh", "--mqttHost", type=str, required=False, default="eclipse-mosquitto",
+	help="MQTT server address or IP")
+ap.add_argument("-mqp", "--mqttPort", type=int, required=False, default=1883,
+	help="MQTT server Port")
+ap.add_argument("-mqt", "--mqttTopic", type=str, required=False, default="test/foo",
+	help="MQTT topic to publish messages to")
+# TODO: Add generic MQTT options param in json form to support ssl certs/self signed certs
 args = vars(ap.parse_args())
+
+if args["useMqtt"] is True:
+	import paho.mqtt.client as paho
+	mqttClient= paho.Client("backend-facial-rec")
+	mqttClient.connect(args["mqttHost"], args["mqttPort"])
 
 # load the known faces and embeddings along with OpenCV's Haar
 # cascade for face detection
@@ -79,7 +96,8 @@ printjson("status", "starting video stream...")
 if args["usePiCamera"] >= 1:
 	vs = VideoStream(usePiCamera=True, rotation=args["rotateCamera"]).start()
 else:
-	vs = VideoStream(src=args["source"]).start()
+	vs = VideoStream("nvarguscamerasrc sensor_id=0 ! nvvidconv ! appsink").start()
+#	vs = VideoStream(src=args["source"]).start()
 time.sleep(2.0)
 
 # variable for prev names
@@ -189,14 +207,24 @@ while True:
 
 	# send inforrmation to prompt, only if something has changes
 	if (logins.__len__() > 0):
-		printjson("login", {
-			"names": logins
-		})
+		type = "login"
+		message = {
+			"users": logins
+		}
+		printjson(type, message)
+		if args["useMqtt"] is True:
+			mqttClient.publish(args["mqttTopic"], convertMessage(type, message))
+			#mqttClient.publish(args["mqttTopic"], json.dumps({"action": "login", "users": logins}))
 
 	if (logouts.__len__() > 0):
-		printjson("logout", {
-			"names": logouts
-		})
+		type = "logout"
+		message = {
+			"users": logouts
+		}
+		printjson(type, message)
+		if args["useMqtt"] is True:
+			mqttClient.publish(args["mqttTopic"], convertMessage(type, message))
+			#mqttClient.publish(args["mqttTopic"], json.dumps({"action": "logout", "users": logouts}))
 
 	# set this names as new prev names for next iteration
 	prevNames = names

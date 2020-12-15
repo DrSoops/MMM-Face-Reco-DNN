@@ -9,6 +9,7 @@
 
 Module.register('MMM-Face-Reco-DNN', {
   defaults: {
+    useExternal: true,
     // Logout 15 seconds after user was not detecte anymore, if they will be detected between this 15
     // Seconds, they delay will start again
     logoutDelay: 15000,
@@ -367,13 +368,17 @@ Module.register('MMM-Face-Reco-DNN', {
   },
   // ----------------------------------------------------------------------------------------------------
   socketNotificationReceived: function(notification, payload) {
+    this.processNotification(payload);
+  },
+  // ----------------------------------------------------------------------------------------------------
+  processNotification: function(payload) {
     var self = this;
     var user;
 
     // somebody has logged in
     if (payload.action === 'login') {
       var loginCount=0;
-      for (user of payload.users) {
+      for (user of payload.message.users) {
         if (user != null) {
           
           // if there are currently no users logged in OR we allow multiple users
@@ -407,11 +412,11 @@ Module.register('MMM-Face-Reco-DNN', {
       if (loginCount>0) {
          // We still need to broadcast MM notification for backward compatability.
          this.config.debug && Log.log('Detected ' + loginCount + ' logins.');
-         this.sendNotification('USERS_LOGIN', payload.users);
+         this.sendNotification('USERS_LOGIN', payload.message.users);
       }
     } else if (payload.action === 'logout') {
       var logoutCount=0;
-      for (user of payload.users) {
+      for (user of payload.message.users) {
         if (user != null) {
           // see if user is even logged in, since you can only log out if you are actually logged in
           if (this.users.includes(user)) {
@@ -432,7 +437,7 @@ Module.register('MMM-Face-Reco-DNN', {
 
       if (logoutCount>0) {
          this.config.debug && Log.log('Detected ' + logoutCount + ' logouts.');
-         this.sendNotification('USERS_LOGOUT', payload.users);
+         this.sendNotification('USERS_LOGOUT', payload.message.users);
       }
     }
   },
@@ -440,6 +445,16 @@ Module.register('MMM-Face-Reco-DNN', {
   // ----------------------------------------------------------------------------------------------------
   notificationReceived: function(notification, payload, sender) {
     var self = this;
+
+    if (sender !== undefined && sender.name === 'MMM-MQTTbind') {
+      Log.log("MQTT");
+      Log.log(notification);
+      Log.log(payload);
+      if (notification === 'RECEIVING_NOTIFICATION_ONE') {
+        var parsedPayload = JSON.parse(payload);
+        this.processNotification(parsedPayload);
+      }
+    }
 
     // Event if DOM is created
     if (notification === 'DOM_OBJECTS_CREATED') {

@@ -13,7 +13,7 @@ var pythonStarted = false;
 
 module.exports = NodeHelper.create({
   pyshell: null,
-  python_start: function() {
+  python_start: function () {
     const self = this;
     const extendedDataset = this.config.extendDataset ? 'True' : 'False';
     const options = {
@@ -31,7 +31,11 @@ module.exports = NodeHelper.create({
         '--output=' + this.config.output,
         '--extendDataset=' + extendedDataset,
         '--dataset=' + this.config.dataset,
-        '--tolerance=' + this.config.tolerance
+        '--tolerance=' + this.config.tolerance,
+        '--useMqtt=' + this.config.useMqtt,
+        '--mqttHost=' + this.config.mqttHost,
+        '--mqttPort=' + this.config.mqttPort,
+        '--mqttTopic=' + this.config.mqttTopic
       ],
     };
 
@@ -46,7 +50,7 @@ module.exports = NodeHelper.create({
     );
 
     // check if a message of the python script is comming in
-    self.pyshell.on('message', function(message) {
+    self.pyshell.on('message', function (message) {
       // A status message has received and will log
       if (message.hasOwnProperty('status')) {
         console.log('[' + self.name + '] ' + message.status);
@@ -56,11 +60,11 @@ module.exports = NodeHelper.create({
       if (message.hasOwnProperty('login')) {
         console.log(
           '[' +
-            self.name +
-            '] ' +
-            'Users ' +
-            message.login.names.join(' - ') +
-            ' logged in.'
+          self.name +
+          '] ' +
+          'Users ' +
+          message.login.names.join(' - ') +
+          ' logged in.'
         );
         self.sendSocketNotification('user', {
           action: 'login',
@@ -72,11 +76,11 @@ module.exports = NodeHelper.create({
       if (message.hasOwnProperty('logout')) {
         console.log(
           '[' +
-            self.name +
-            '] ' +
-            'Users ' +
-            message.logout.names.join(' - ') +
-            ' logged out.'
+          self.name +
+          '] ' +
+          'Users ' +
+          message.logout.names.join(' - ') +
+          ' logged out.'
         );
         self.sendSocketNotification('user', {
           action: 'logout',
@@ -86,39 +90,39 @@ module.exports = NodeHelper.create({
     });
 
     // Shutdown node helper
-    self.pyshell.end(function(err) {
+    self.pyshell.end(function (err) {
       if (err) throw err;
       console.log('[' + self.name + '] ' + 'finished running...');
     });
 
-    onExit(function(code, signal) {
+    onExit(function (code, signal) {
       self.destroy();
     });
   },
 
-  python_stop: function() {
+  python_stop: function () {
     this.destroy();
   },
 
-  destroy: function() {
+  destroy: function () {
     console.log('[' + this.name + '] ' + 'Terminate python');
     this.pyshell.childProcess.kill();
   },
 
-  socketNotificationReceived: function(notification, payload) {
+  socketNotificationReceived: function (notification, payload) {
     // Configuration are received
     if (notification === 'CONFIG') {
       this.config = payload;
       // Set static output to 0, because we do not need any output for MMM
       this.config.output = 0;
-      if (!pythonStarted) {
+      if (!payload.useExternal && !pythonStarted) {
         pythonStarted = true;
         this.python_start();
       }
     }
   },
 
-  stop: function() {
+  stop: function () {
     pythonStarted = false;
     this.python_stop();
   },
