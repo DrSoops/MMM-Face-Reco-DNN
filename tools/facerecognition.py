@@ -83,6 +83,7 @@ if args["useMqtt"] is True:
 	import paho.mqtt.client as paho
 	mqttClient= paho.Client("backend-facial-rec")
 	mqttClient.connect(args["mqttHost"], args["mqttPort"])
+	printjson("status", "Connected to mqtt client {}:{}".format(args["mqttHost"], args["mqttPort"]))
 
 # load the known faces and embeddings along with OpenCV's Haar
 # cascade for face detection
