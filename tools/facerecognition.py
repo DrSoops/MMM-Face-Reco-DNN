@@ -80,9 +80,9 @@ ap.add_argument("-mqt", "--mqttTopic", type=str, required=False, default="test/f
 args = vars(ap.parse_args())
 
 if args["useMqtt"] is True:
-	import paho.mqtt.client as paho
-	mqttClient= paho.Client("backend-facial-rec")
-	mqttClient.connect(args["mqttHost"], args["mqttPort"])
+	import mqttClient as mqc
+	mqttClient = mqc.Client("backend-facial-rec")
+	mqttClient.start(args["mqttHost"], args["mqttPort"])
 	printjson("status", "Connected to mqtt client {}:{}".format(args["mqttHost"], args["mqttPort"]))
 
 # load the known faces and embeddings along with OpenCV's Haar
@@ -215,7 +215,6 @@ while True:
 		printjson(type, message)
 		if args["useMqtt"] is True:
 			mqttClient.publish(args["mqttTopic"], convertMessage(type, message))
-			#mqttClient.publish(args["mqttTopic"], json.dumps({"action": "login", "users": logins}))
 
 	if (logouts.__len__() > 0):
 		type = "logout"
@@ -225,7 +224,6 @@ while True:
 		printjson(type, message)
 		if args["useMqtt"] is True:
 			mqttClient.publish(args["mqttTopic"], convertMessage(type, message))
-			#mqttClient.publish(args["mqttTopic"], json.dumps({"action": "logout", "users": logouts}))
 
 	# set this names as new prev names for next iteration
 	prevNames = names
@@ -245,3 +243,5 @@ printjson("status", "approx. FPS: {:.2f}".format(fps.fps()))
 # do a bit of cleanup
 cv2.destroyAllWindows()
 vs.stream.release()
+if args["useMqtt"] is True:
+	mqttClient.stop()
