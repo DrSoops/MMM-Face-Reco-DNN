@@ -97,8 +97,7 @@ printjson("status", "starting video stream...")
 if args["usePiCamera"] >= 1:
 	vs = VideoStream(usePiCamera=True, rotation=args["rotateCamera"]).start()
 else:
-	vs = VideoStream("nvarguscamerasrc sensor_id=0 ! nvvidconv ! appsink").start()
-#	vs = VideoStream(src=args["source"]).start()
+	vs = VideoStream(src=args["source"]).start()
 time.sleep(2.0)
 
 # variable for prev names
