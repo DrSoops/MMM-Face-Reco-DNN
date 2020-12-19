@@ -155,7 +155,7 @@ while True:
 		distances = face_recognition.face_distance(data["encodings"], encoding)
 
 		# the smallest distance is the closest to the encoding
-		minDistance = min(distances)
+		minDistance = min(distances, default=sys.maxsize)
 
 		# save the name if the distance is below the tolerance
 		if minDistance < tolerance:
