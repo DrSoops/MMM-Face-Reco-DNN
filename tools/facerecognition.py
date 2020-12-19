@@ -106,10 +106,7 @@ prevNames = []
 # create unknown path if needed
 if args["extendDataset"] is True:
 	unknownPath = os.path.dirname(args["dataset"] + "unknown/")
-	try:
-			os.stat(unknownPath)
-	except:
-			os.mkdir(unknownPath)
+	os.makedirs(unknownPath, exist_ok=True)
 
 tolerance = float(args["tolerance"])
 
