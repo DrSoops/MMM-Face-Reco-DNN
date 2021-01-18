@@ -74,7 +74,7 @@ ap.add_argument("-mqh", "--mqttHost", type=str, required=False, default="eclipse
 	help="MQTT server address or IP")
 ap.add_argument("-mqp", "--mqttPort", type=int, required=False, default=1883,
 	help="MQTT server Port")
-ap.add_argument("-mqt", "--mqttTopic", type=str, required=False, default="test/foo",
+ap.add_argument("-mqt", "--mqttTopic", type=str, required=False, default="facialrecognition/raw",
 	help="MQTT topic to publish messages to")
 # TODO: Add generic MQTT options param in json form to support ssl certs/self signed certs
 args = vars(ap.parse_args())

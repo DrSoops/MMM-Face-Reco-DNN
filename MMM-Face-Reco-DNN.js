@@ -450,7 +450,7 @@ Module.register('MMM-Face-Reco-DNN', {
       Log.log("MQTT");
       Log.log(notification);
       Log.log(payload);
-      if (notification === 'RECEIVING_NOTIFICATION_ONE') {
+      if (notification === 'FACIAL_RECOGNITION') {
         var parsedPayload = JSON.parse(payload);
         this.processNotification(parsedPayload);
       }
