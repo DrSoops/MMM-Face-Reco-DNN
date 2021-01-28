@@ -41,6 +41,10 @@ class Client(paho.Client):
 		self.connect(host, port)
 		self.loop_start()
 
+	def start_forever(self, host, port):
+		self.connect(host, port)
+		self.loop_forever()
+
 	def stop(self):
 		self.loop_stop()
 		self.disconnect()
