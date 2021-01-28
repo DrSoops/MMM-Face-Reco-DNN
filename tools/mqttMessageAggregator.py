@@ -50,8 +50,7 @@ def on_message_msgs(mosq, obj, msg):
 
 loggedInUsers = {}
 ap = argparse.ArgumentParser()
-ap.add_argument("-mqh", "--mqttHost", type=str, required=False, default="192.168.0.60",
-#ap.add_argument("-mqh", "--mqttHost", type=str, required=False, default="eclipse-mosquitto",
+ap.add_argument("-mqh", "--mqttHost", type=str, required=False, default="eclipse-mosquitto",
         help="MQTT server address or IP")
 ap.add_argument("-mqp", "--mqttPort", type=int, required=False, default=30004,
         help="MQTT server Port")
