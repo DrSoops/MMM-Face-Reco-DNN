@@ -52,7 +52,7 @@ loggedInUsers = {}
 ap = argparse.ArgumentParser()
 ap.add_argument("-mqh", "--mqttHost", type=str, required=False, default="eclipse-mosquitto",
         help="MQTT server address or IP")
-ap.add_argument("-mqp", "--mqttPort", type=int, required=False, default=30004,
+ap.add_argument("-mqp", "--mqttPort", type=int, required=False, default=1883,
         help="MQTT server Port")
 ap.add_argument("-mqt", "--mqttTopic", type=str, required=False, default="facialrecognition/converted",
         help="MQTT topic to publish messages to")
