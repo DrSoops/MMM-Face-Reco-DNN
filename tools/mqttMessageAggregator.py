@@ -48,6 +48,7 @@ def on_message_msgs(mosq, obj, msg):
         elif(action == "logout"):
                 on_logout(jsonMessage["message"]["users"])
 
+print("Started")
 loggedInUsers = {}
 ap = argparse.ArgumentParser()
 ap.add_argument("-mqh", "--mqttHost", type=str, required=False, default="eclipse-mosquitto",
@@ -60,8 +61,6 @@ ap.add_argument("-mqts", "--mqttTopicSub", type=str, required=False, default="fa
         help="MQTT topic to publish messages to")
 # TODO: Add generic MQTT options param in json form to support ssl certs/self signed certs
 args = vars(ap.parse_args())
-
-
 
 mqttClient = mqc.Client("converter-facial-rec", clean_session=False)
 mqttClient.message_callback_add(args["mqttTopicSub"], on_message_msgs)
